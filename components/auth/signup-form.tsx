@@ -29,6 +29,7 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorDetail, setErrorDetail] = useState<string | null>(null)
+  const [redirectUsed, setRedirectUsed] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormData>({
@@ -38,6 +39,7 @@ export function SignupForm() {
   const onSubmit = async (data: SignupFormData) => {
     setError(null)
     setErrorDetail(null)
+    setRedirectUsed(null)
     try {
       const result = await signUpAction({
         email: data.email,
@@ -47,6 +49,7 @@ export function SignupForm() {
       if (result.error) {
         setError(result.error)
         setErrorDetail(result.detail ?? null)
+        setRedirectUsed(result.emailRedirectTo ?? null)
       } else {
         setSuccess(true)
       }
@@ -135,6 +138,9 @@ export function SignupForm() {
       {error && (
         <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 space-y-1">
           <p>{error}</p>
+          {redirectUsed && (
+            <p className="text-xs text-zinc-400 font-mono break-all">emailRedirectTo: {redirectUsed}</p>
+          )}
           {errorDetail && (
             <p className="text-xs text-red-300/70 font-mono break-all">{errorDetail}</p>
           )}

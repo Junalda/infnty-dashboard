@@ -24,7 +24,7 @@ export async function signUpAction(data: {
   email: string
   password: string
   full_name: string
-}): Promise<{ error?: string; detail?: string }> {
+}): Promise<{ error?: string; detail?: string; emailRedirectTo?: string }> {
   // These are resolved from the server's process.env at runtime — not baked
   // into the client bundle at build time like NEXT_PUBLIC_* vars are.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -76,7 +76,7 @@ export async function signUpAction(data: {
 
     if (error) {
       console.error('[signUpAction] Supabase auth error — status:', error.status, '| message:', error.message)
-      return { error: error.message }
+      return { error: error.message, emailRedirectTo }
     }
 
     console.log('[signUpAction] Success — confirmation email dispatched to', data.email)
