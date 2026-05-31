@@ -47,6 +47,7 @@ export function SignupForm() {
     })
 
     if (error) {
+      console.error('[signup] Supabase error:', error.status, error.message, error)
       setError(error.message)
     } else {
       setSuccess(true)
@@ -59,9 +60,9 @@ export function SignupForm() {
         <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
           <span className="text-3xl">✓</span>
         </div>
-        <h3 className="text-xl font-bold text-white">Check your email</h3>
+        <h3 className="text-xl font-bold text-white">Account created</h3>
         <p className="text-zinc-400 text-sm">
-          We sent a confirmation link to your email. Click it to activate your account.
+          Please check your email to confirm your account.
         </p>
         <Button variant="secondary" onClick={() => router.push('/login')} className="w-full">
           Back to Sign In
