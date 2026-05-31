@@ -24,9 +24,17 @@ export default async function DashboardLayout({
 
   const role = (profile?.role ?? 'customer') as UserRole
 
+  const { data: subs } = await supabase
+    .from('subscriptions')
+    .select('plan:subscription_plans(pillar)')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+
+  const pillars = [...new Set((subs ?? []).map((s: any) => (s.plan as any)?.pillar).filter(Boolean))] as string[]
+
   return (
     <div className="flex min-h-screen bg-black">
-      <Sidebar role={role} />
+      <Sidebar role={role} pillars={pillars} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header role={role} />
         <main className="flex-1 p-6 overflow-auto">
