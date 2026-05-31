@@ -1,6 +1,14 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+// Deliberately NOT using @supabase/ssr createServerClient here.
+// createServerClient forces flowType:'pkce', which requires GoTrue to validate
+// a redirect URL on every signUp call — causing "Invalid path specified in
+// request URL" when no emailRedirectTo is provided and the Site URL fails
+// GoTrue's internal path validation.
+//
+// @supabase/supabase-js standalone defaults to flowType:'implicit', which
+// does not perform that redirect URL validation on signUp.
+import { createClient } from '@supabase/supabase-js'
 
 function serializeError(err: unknown): string {
   if (err instanceof Error) {
@@ -17,9 +25,12 @@ export async function signUpAction(data: {
   password: string
   full_name: string
 }): Promise<{ error?: string; detail?: string }> {
+  // These are resolved from the server's process.env at runtime — not baked
+  // into the client bundle at build time like NEXT_PUBLIC_* vars are.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  console.log('[signUpAction] handler=app/actions/auth.ts')
   console.log('[signUpAction] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ?? '(not set)')
   console.log('[signUpAction] NEXT_PUBLIC_SUPABASE_ANON_KEY present:', !!supabaseKey)
 
@@ -34,28 +45,13 @@ export async function signUpAction(data: {
     return { error: msg }
   }
 
-  // Connectivity pre-check: can the server reach Supabase at all?
-  const healthUrl = `${supabaseUrl}/auth/v1/health`
-  try {
-    const probe = await fetch(healthUrl, { method: 'GET' })
-    console.log('[signUpAction] Supabase health probe — status:', probe.status, 'url:', healthUrl)
-  } catch (probeErr) {
-    const detail = serializeError(probeErr)
-    console.error('[signUpAction] Supabase health probe FAILED:', detail)
-    return {
-      error: `Server cannot reach Supabase at ${supabaseUrl}. Check that NEXT_PUBLIC_SUPABASE_URL is correct and the project is not paused.`,
-      detail,
-    }
-  }
-
-  let supabase: Awaited<ReturnType<typeof createClient>>
-  try {
-    supabase = await createClient()
-  } catch (clientErr) {
-    const detail = serializeError(clientErr)
-    console.error('[signUpAction] createClient() threw:', detail)
-    return { error: 'Failed to initialise Supabase client on the server.', detail }
-  }
+  // Plain supabase-js client — no SSR wrapper, no forced PKCE
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
 
   try {
     const { error } = await supabase.auth.signUp({
@@ -67,17 +63,17 @@ export async function signUpAction(data: {
     })
 
     if (error) {
-      console.error('[signUpAction] Supabase auth error — status:', error.status, '| message:', error.message, '| full:', error)
+      console.error('[signUpAction] Supabase auth error — status:', error.status, '| message:', error.message)
       return { error: error.message }
     }
 
     console.log('[signUpAction] Success — confirmation email dispatched to', data.email)
     return {}
-  } catch (signUpErr) {
-    const detail = serializeError(signUpErr)
-    console.error('[signUpAction] supabase.auth.signUp() threw:', detail)
+  } catch (err) {
+    const detail = serializeError(err)
+    console.error('[signUpAction] signUp threw:', detail)
     return {
-      error: `Signup request to Supabase failed: ${signUpErr instanceof Error ? signUpErr.message : String(signUpErr)}`,
+      error: err instanceof Error ? err.message : String(err),
       detail,
     }
   }
