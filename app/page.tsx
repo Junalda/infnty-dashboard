@@ -228,13 +228,7 @@ export default function LandingPage() {
           />
 
           {/* Content Engine */}
-          <PricingSection
-            pillar="content"
-            label="Content Engine"
-            icon={Video}
-            accent="amber"
-            plans={pillarPlans.content}
-          />
+          <ContentEnginePricing />
 
           {/* Sound Lab */}
           <PricingSection
@@ -295,6 +289,176 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+    </div>
+  )
+}
+
+const CONTENT_PLANS = {
+  oneTime: [
+    {
+      id: 'content-day-lite',
+      name: 'Content Day Lite',
+      price: 350,
+      billing: 'one-time',
+      cta: 'Book Content Day',
+      features: [
+        '1 hour studio video recording',
+        '5 short-form clips',
+        'Content selection',
+        'Export delivery',
+      ],
+    },
+    {
+      id: 'content-day-pro',
+      name: 'Content Day Pro',
+      price: 750,
+      billing: 'one-time',
+      cta: 'Book Pro Day',
+      features: [
+        '2 hours studio video recording',
+        '10 short-form clips',
+        'Content selection',
+        'Export delivery',
+      ],
+    },
+  ],
+  monthly: [
+    {
+      id: 'content-engine-growth',
+      name: 'Content Engine Growth',
+      price: 1500,
+      billing: 'month',
+      popular: false,
+      cta: 'Scale My Content',
+      features: [
+        'Monthly production day',
+        '20–30 Shorts/Reels',
+        'Photos',
+        'Behind-the-scenes content',
+        'Content planning',
+        'Content distribution guidance',
+      ],
+    },
+    {
+      id: 'authority-engine',
+      name: 'Authority Engine',
+      price: 2700,
+      billing: 'month',
+      popular: true,
+      cta: 'Build Authority',
+      features: [
+        'Podcast recording',
+        '4 video recording sessions per month',
+        '40 Shorts/Reels',
+        'Content calendar',
+        'Content distribution guidance',
+        'Authority-building content strategy',
+      ],
+    },
+  ],
+}
+
+function ContentEnginePricing() {
+  return (
+    <div className="mb-20">
+      {/* Section header */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center">
+          <Video className="h-5 w-5 text-white" />
+        </div>
+        <h3 className="text-2xl font-bold text-amber-400">Content Creation Services</h3>
+      </div>
+      <p className="text-zinc-400 mb-10 ml-[52px]">Turn one recording session into weeks of content.</p>
+
+      {/* Row 1 — One-time packages */}
+      <div className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-4">Single Sessions</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {CONTENT_PLANS.oneTime.map((plan) => (
+            <div
+              key={plan.id}
+              className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-8 flex flex-col"
+            >
+              <div className="mb-5">
+                <p className="text-sm font-semibold uppercase tracking-wider mb-1 text-amber-400">Content Engine</p>
+                <h4 className="text-xl font-bold text-white">{plan.name}</h4>
+              </div>
+              <div className="mb-7">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-black text-white">€{plan.price.toLocaleString()}</span>
+                  <span className="text-zinc-500 text-sm">one-time</span>
+                </div>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex gap-2.5 text-sm text-zinc-300">
+                    <Check className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button size="lg" className="w-full" variant="outline" asChild>
+                <Link href={`/signup?plan=${plan.id}&pillar=content`}>{plan.cta}</Link>
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4 my-8">
+        <div className="flex-1 h-px bg-zinc-800" />
+        <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Monthly Retainers</span>
+        <div className="flex-1 h-px bg-zinc-800" />
+      </div>
+
+      {/* Row 2 — Monthly retainers */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {CONTENT_PLANS.monthly.map((plan) => (
+          <div
+            key={plan.id}
+            className={`relative rounded-3xl border p-8 flex flex-col ${
+              plan.popular
+                ? 'border-amber-500/40 bg-gradient-to-b from-amber-950/40 to-zinc-900/60'
+                : 'border-zinc-800 bg-zinc-900/40'
+            }`}
+          >
+            {plan.popular && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-black flex items-center gap-1 whitespace-nowrap">
+                <Star className="h-3 w-3" /> Most Popular
+              </div>
+            )}
+            <div className="mb-5">
+              <p className="text-sm font-semibold uppercase tracking-wider mb-1 text-amber-400">Content Engine</p>
+              <h4 className="text-xl font-bold text-white">{plan.name}</h4>
+            </div>
+            <div className="mb-7">
+              <div className="flex items-baseline gap-1">
+                <span className={`text-4xl font-black ${plan.popular ? 'text-amber-300' : 'text-white'}`}>
+                  €{plan.price.toLocaleString()}
+                </span>
+                <span className="text-zinc-500 text-sm">/month</span>
+              </div>
+            </div>
+            <ul className="space-y-3 mb-8 flex-1">
+              {plan.features.map((f) => (
+                <li key={f} className="flex gap-2.5 text-sm text-zinc-300">
+                  <Check className={`h-4 w-4 shrink-0 mt-0.5 ${plan.popular ? 'text-amber-400' : 'text-amber-400'}`} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Button
+              size="lg"
+              className={`w-full ${plan.popular ? 'bg-amber-500 hover:bg-amber-400 text-black font-bold' : ''}`}
+              variant={plan.popular ? 'default' : 'outline'}
+              asChild
+            >
+              <Link href={`/signup?plan=${plan.id}&pillar=content`}>{plan.cta}</Link>
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
