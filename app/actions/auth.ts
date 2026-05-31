@@ -53,12 +53,24 @@ export async function signUpAction(data: {
     },
   })
 
+  // Construct emailRedirectTo from server-side env vars so GoTrue never falls
+  // back to the Site URL (which fails its internal path validation).
+  // Priority: NEXT_PUBLIC_APP_URL → VERCEL_URL → supabaseUrl origin as last resort.
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+    new URL(supabaseUrl).origin.replace('.supabase.co', '.vercel.app')
+
+  const emailRedirectTo = `${appUrl}/auth/callback`
+  console.log('[signUpAction] emailRedirectTo:', emailRedirectTo)
+
   try {
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
         data: { full_name: data.full_name },
+        emailRedirectTo,
       },
     })
 
