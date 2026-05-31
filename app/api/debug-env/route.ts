@@ -7,29 +7,35 @@ export async function GET() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
-  let urlHost: string | null = null
-  let urlValid = false
+  let urlParsed: { host: string; origin: string; pathname: string } | null = null
+  let urlError: string | null = null
   try {
-    const parsed = new URL(supabaseUrl)
-    urlHost = parsed.host
-    urlValid = true
-  } catch {
-    urlHost = null
-    urlValid = false
+    const p = new URL(supabaseUrl)
+    urlParsed = { host: p.host, origin: p.origin, pathname: p.pathname }
+  } catch (e) {
+    urlError = String(e)
   }
 
+  // Check for common formatting mistakes
+  const warnings: string[] = []
+  if (supabaseUrl.endsWith('/')) warnings.push('URL has a trailing slash')
+  if (supabaseUrl !== supabaseUrl.trim()) warnings.push('URL has leading or trailing whitespace')
+  if (supabaseUrl.includes(' ')) warnings.push('URL contains spaces')
+  if (supabaseUrl.includes('\n') || supabaseUrl.includes('\r')) warnings.push('URL contains newline characters')
+
   return NextResponse.json({
+    // NEXT_PUBLIC_SUPABASE_URL is intentionally public — safe to expose in full
     NEXT_PUBLIC_SUPABASE_URL: {
-      set: supabaseUrl.length > 0,
-      placeholder: supabaseUrl === 'https://your-project.supabase.co',
-      host: urlHost,
-      valid_url: urlValid,
+      value: supabaseUrl,          // full value for copy/paste comparison
       length: supabaseUrl.length,
+      parsed: urlParsed,
+      parse_error: urlError,
+      warnings,
     },
     NEXT_PUBLIC_SUPABASE_ANON_KEY: {
       set: anonKey.length > 0,
       length: anonKey.length,
-      prefix: anonKey.slice(0, 8) || null,
+      first_8_chars: anonKey.slice(0, 8) || null,
     },
     SUPABASE_SERVICE_ROLE_KEY: {
       set: serviceKey.length > 0,
