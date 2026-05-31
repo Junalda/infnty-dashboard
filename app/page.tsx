@@ -1,65 +1,405 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Check, Star, Mic2, Video, Music2, ChevronRight, Zap, Clock, Shield } from 'lucide-react'
+import { PRICING_PLANS } from '@/lib/stripe'
+import { formatCurrency } from '@/lib/utils'
 
-export default function Home() {
+export const metadata = {
+  title: 'INFNTY Studio — 24/7 Creator, Music & Content Hub',
+  description: 'Amsterdam\'s premium creative hub for rehearsal, content production, and music creation.',
+}
+
+const pillars = [
+  {
+    id: 'rehearsal',
+    label: 'Rehearsal',
+    icon: Mic2,
+    color: 'rose',
+    gradient: 'from-rose-600 to-rose-900',
+    border: 'border-rose-500/20',
+    bg: 'bg-rose-500/5',
+    accent: 'text-rose-400',
+    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    description: 'Fully equipped rehearsal rooms for bands, musicians and performers. Book 24/7.',
+  },
+  {
+    id: 'content',
+    label: 'Content Engine',
+    icon: Video,
+    color: 'amber',
+    gradient: 'from-amber-600 to-amber-900',
+    border: 'border-amber-500/20',
+    bg: 'bg-amber-500/5',
+    accent: 'text-amber-400',
+    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    description: 'Professional content production for creators, brands and entrepreneurs.',
+  },
+  {
+    id: 'soundlab',
+    label: 'Sound Lab',
+    icon: Music2,
+    color: 'purple',
+    gradient: 'from-purple-600 to-purple-900',
+    border: 'border-purple-500/20',
+    bg: 'bg-purple-500/5',
+    accent: 'text-purple-400',
+    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    description: 'AI-assisted music production, recording and mastering for independent artists.',
+  },
+]
+
+type PillarKey = 'rehearsal' | 'content' | 'soundlab'
+type Plan = {
+  name: string
+  tier: string
+  price: number
+  hours?: number | null
+  popular?: boolean
+  features: string[]
+}
+
+const pillarPlans: Record<PillarKey, Plan[]> = PRICING_PLANS as Record<PillarKey, Plan[]>
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-black text-white">
+      {/* Nav */}
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-zinc-900 bg-black/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center shadow-lg shadow-rose-900/50">
+              <span className="text-white font-bold text-base leading-none">∞</span>
+            </div>
+            <span className="font-bold text-white text-lg">INFNTY Studio</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+            <a href="#pillars" className="hover:text-white transition-colors">Pillars</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#about" className="hover:text-white transition-colors">About</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/signup">Get Started</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative pt-32 pb-24 px-4 sm:px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(244,63,94,0.08)_0%,_transparent_60%)] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-rose-600/3 blur-3xl rounded-full pointer-events-none" />
+
+        <div className="max-w-5xl mx-auto text-center relative">
+          <Badge className="inline-flex mb-6 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold px-3 py-1.5">
+            Amsterdam&apos;s Premier Creative Hub · Open 24/7
+          </Badge>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-6">
+            Create without{' '}
+            <span className="bg-gradient-to-r from-rose-400 to-rose-600 bg-clip-text text-transparent">
+              limits
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            INFNTY Studio is your 24/7 home for rehearsal, content production and music creation.
+            Three pillars. One hub. Infinite possibilities.
           </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="xl" asChild>
+              <Link href="/signup">
+                Start for free <ChevronRight className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button size="xl" variant="outline" asChild>
+              <a href="#pricing">View pricing</a>
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-8 mt-20 max-w-lg mx-auto">
+            {[
+              { label: 'Open', value: '24/7' },
+              { label: 'Pillars', value: '3' },
+              { label: 'Buffer', value: '0' },
+            ].map(s => (
+              <div key={s.label}>
+                <p className="text-3xl font-black text-white">{s.value}</p>
+                <p className="text-sm text-zinc-500 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Three Pillars */}
+      <section id="pillars" className="py-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black mb-4">Three Pillars</h2>
+            <p className="text-zinc-400 text-lg max-w-xl mx-auto">
+              Everything you need to create, perform and grow under one roof.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pillars.map(pillar => {
+              const Icon = pillar.icon
+              return (
+                <div
+                  key={pillar.id}
+                  className={`relative rounded-3xl border ${pillar.border} ${pillar.bg} p-8 overflow-hidden group hover:scale-[1.02] transition-transform duration-300`}
+                >
+                  <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${pillar.gradient} opacity-5 rounded-full -translate-y-12 translate-x-12 group-hover:opacity-10 transition-opacity`} />
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${pillar.gradient} flex items-center justify-center mb-6 shadow-lg`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className={`text-xl font-bold mb-3 ${pillar.accent}`}>{pillar.label}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed">{pillar.description}</p>
+                  <a href="#pricing" className={`inline-flex items-center gap-1 text-sm font-medium mt-6 ${pillar.accent} hover:opacity-80 transition-opacity`}>
+                    View plans <ChevronRight className="h-4 w-4" />
+                  </a>
+                </div>
+              )
+            })}
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Why INFNTY */}
+      <section className="py-20 px-4 sm:px-6 border-y border-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Clock,
+                title: 'Book 24/7',
+                description: 'Our studios are always open. Book any time, any day, using our real-time booking system.',
+              },
+              {
+                icon: Zap,
+                title: 'Hour Rollover',
+                description: 'Unused hours roll over to next month (up to 25%). Your time, your schedule.',
+              },
+              {
+                icon: Shield,
+                title: 'Flexible Plans',
+                description: 'Start free. Upgrade anytime. Pay only for what you use with loose-hour bookings at €35/hr.',
+              },
+            ].map(item => {
+              const Icon = item.icon
+              return (
+                <div key={item.title} className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5 text-rose-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-1">{item.title}</h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed">{item.description}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black mb-4">Pricing</h2>
+            <p className="text-zinc-400 text-lg max-w-xl mx-auto">
+              Choose a pillar and a plan that fits your creative ambitions.
+            </p>
+          </div>
+
+          {/* Rehearsal */}
+          <PricingSection
+            pillar="rehearsal"
+            label="Rehearsal"
+            icon={Mic2}
+            accent="rose"
+            plans={pillarPlans.rehearsal}
+          />
+
+          {/* Content Engine */}
+          <PricingSection
+            pillar="content"
+            label="Content Engine"
+            icon={Video}
+            accent="amber"
+            plans={pillarPlans.content}
+          />
+
+          {/* Sound Lab */}
+          <PricingSection
+            pillar="soundlab"
+            label="Sound Lab"
+            icon={Music2}
+            accent="purple"
+            plans={pillarPlans.soundlab}
+          />
+
+          {/* Loose hours */}
+          <div className="mt-16 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+            <h3 className="text-2xl font-bold text-white mb-3">Just need a few hours?</h3>
+            <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
+              Book rehearsal time without a subscription. Loose hours are charged at <strong className="text-white">€35/hour</strong> and must be paid at booking.
+            </p>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/signup">Create Free Account</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="rounded-3xl bg-gradient-to-br from-rose-950/60 to-zinc-950 border border-rose-900/30 p-12">
+            <h2 className="text-4xl font-black mb-4">Ready to create?</h2>
+            <p className="text-zinc-400 text-lg mb-8">
+              Join INFNTY Studio today. Free account, no credit card required.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="xl" asChild>
+                <Link href="/signup">Sign Up Free</Link>
+              </Button>
+              <Button size="xl" variant="outline" asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-zinc-900 py-12 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">∞</span>
+            </div>
+            <span className="font-bold text-white">INFNTY Studio</span>
+          </div>
+          <p className="text-sm text-zinc-600">© {new Date().getFullYear()} INFNTY Studio. All rights reserved.</p>
+          <div className="flex gap-4 text-sm text-zinc-500">
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          </div>
+        </div>
+      </footer>
     </div>
-  );
+  )
+}
+
+type AccentColor = 'rose' | 'amber' | 'purple'
+
+function PricingSection({
+  label,
+  icon: Icon,
+  accent,
+  plans,
+}: {
+  pillar: string
+  label: string
+  icon: React.ElementType
+  accent: AccentColor
+  plans: Plan[]
+}) {
+  const accentClasses: Record<AccentColor, { text: string; border: string; bg: string; badge: string; popular: string; gradient: string }> = {
+    rose: {
+      text: 'text-rose-400',
+      border: 'border-rose-500/30',
+      bg: 'bg-rose-500/5',
+      badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      popular: 'bg-rose-600 text-white',
+      gradient: 'from-rose-600 to-rose-800',
+    },
+    amber: {
+      text: 'text-amber-400',
+      border: 'border-amber-500/30',
+      bg: 'bg-amber-500/5',
+      badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      popular: 'bg-amber-500 text-black',
+      gradient: 'from-amber-600 to-amber-800',
+    },
+    purple: {
+      text: 'text-purple-400',
+      border: 'border-purple-500/30',
+      bg: 'bg-purple-500/5',
+      badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      popular: 'bg-purple-600 text-white',
+      gradient: 'from-purple-600 to-purple-800',
+    },
+  }
+  const c = accentClasses[accent]
+
+  return (
+    <div className="mb-20">
+      <div className="flex items-center gap-3 mb-8">
+        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center`}>
+          <Icon className="h-5 w-5 text-white" />
+        </div>
+        <h3 className={`text-2xl font-bold ${c.text}`}>{label}</h3>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {plans.map((plan) => (
+          <div
+            key={plan.tier}
+            className={`relative rounded-3xl border ${plan.popular ? c.border : 'border-zinc-800'} ${plan.popular ? c.bg : 'bg-zinc-900/40'} p-8 flex flex-col`}
+          >
+            {plan.popular && (
+              <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold ${c.popular} flex items-center gap-1`}>
+                <Star className="h-3 w-3" /> Most Popular
+              </div>
+            )}
+            <div className="mb-6">
+              <p className={`text-sm font-semibold uppercase tracking-wider mb-1 ${c.text}`}>{label}</p>
+              <h4 className="text-xl font-bold text-white">{plan.name}</h4>
+              {plan.hours !== undefined && plan.hours !== null && (
+                <p className="text-xs text-zinc-500 mt-1">{plan.hours}h/month included</p>
+              )}
+              {plan.hours === null && (
+                <p className="text-xs text-zinc-500 mt-1">Unlimited hours</p>
+              )}
+            </div>
+
+            <div className="mb-8">
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black text-white">€{plan.price}</span>
+                <span className="text-zinc-500">/month</span>
+              </div>
+            </div>
+
+            <ul className="space-y-3 mb-8 flex-1">
+              {plan.features.map((f) => (
+                <li key={f} className="flex gap-2.5 text-sm text-zinc-300">
+                  <Check className={`h-4 w-4 shrink-0 mt-0.5 ${c.text}`} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              size="lg"
+              className="w-full"
+              variant={plan.popular ? 'default' : 'outline'}
+              asChild
+            >
+              <Link href={`/signup?plan=${plan.tier}&pillar=${label.toLowerCase().replace(' ', '_')}`}>
+                Get Started
+              </Link>
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
