@@ -86,9 +86,9 @@ create policy "Admins can manage plans"
 
 -- Seed subscription plans
 insert into public.subscription_plans (name, pillar, tier, price_monthly, included_hours, features) values
-  ('Starter',            'rehearsal', 'starter',           200,  40,   '["40 hours/month rehearsal time","Standard rooms","Online booking","Email support","Up to 25% hour rollover"]'),
-  ('Performer',          'rehearsal', 'performer',         300,  65,   '["65 hours/month rehearsal time","Priority room access","Online booking","Priority support","Up to 25% hour rollover","Locker storage"]'),
-  ('Unlimited',          'rehearsal', 'unlimited',         400,  null, '["Unlimited rehearsal hours","All rooms access","Online booking","Dedicated support","Free hour rollover","Locker storage","Guest passes (2/month)"]'),
+  ('Starter',            'rehearsal', 'starter',           200,  8,    '["8 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 2h rollover per month","Extra hours at €35/hr"]'),
+  ('Performer',          'rehearsal', 'performer',         300,  12,   '["12 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 3h rollover per month","Extra hours at €35/hr"]'),
+  ('Professional',       'rehearsal', 'professional',      400,  16,   '["16 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 4h rollover per month","Extra hours at €35/hr"]'),
   ('Starter',            'content',   'starter',           750,  null, '["2 content shoots/month","Basic editing","Social media package","3 revisions per video","Content calendar"]'),
   ('Growth',             'content',   'growth',           1500,  null, '["4 content shoots/month","Advanced editing + color grade","Multi-platform optimization","Unlimited revisions","Content strategy session","Analytics report"]'),
   ('Authority',          'content',   'authority',        2700,  null, '["8 content shoots/month","Full production team","All platforms covered","Unlimited revisions","Dedicated content strategist","Monthly performance review","Priority scheduling"]'),
@@ -189,11 +189,9 @@ create policy "Admins can manage rooms"
 
 -- Seed rooms
 insert into public.rooms (name, pillar, description, capacity, hourly_rate) values
-  ('Rehearsal Room A', 'rehearsal', 'Large rehearsal space with full backline, PA system, and drum kit.', 6, 35),
-  ('Rehearsal Room B', 'rehearsal', 'Mid-size room with PA, keyboard, and guitar/bass amps.', 4, 35),
-  ('Rehearsal Room C', 'rehearsal', 'Compact practice room ideal for duos or solo rehearsal.', 2, 35),
-  ('Content Studio',   'content',   'Professional content studio with lighting, backdrop and teleprompter.', 4, 35),
-  ('Sound Lab',        'soundlab',  'Professional recording studio with isolation booth and full production suite.', 3, 35);
+  ('Rehearsal Room', 'rehearsal', 'Fully equipped rehearsal space with PA system, backline and drum kit. Available 24/7 for all members.', 6, 35),
+  ('Content Studio', 'content',   'Professional content studio with lighting, backdrop and teleprompter.', 4, 35),
+  ('Sound Lab',      'soundlab',  'Professional recording studio with isolation booth and full production suite.', 3, 35);
 
 -- ============================================================
 -- BOOKINGS

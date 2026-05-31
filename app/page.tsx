@@ -22,7 +22,7 @@ const pillars = [
     bg: 'bg-rose-500/5',
     accent: 'text-rose-400',
     badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-    description: 'Fully equipped rehearsal rooms for bands, musicians and performers. Book 24/7.',
+    description: 'One fully equipped rehearsal room for bands, musicians and performers. Available 24/7 for all members.',
   },
   {
     id: 'content',
