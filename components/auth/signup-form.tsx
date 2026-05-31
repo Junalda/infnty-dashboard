@@ -36,20 +36,52 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setError(null)
+
+    // Diagnose env var availability at runtime
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    console.log('[signup] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ?? '(not set)')
+    console.log('[signup] NEXT_PUBLIC_SUPABASE_ANON_KEY present:', !!supabaseKey)
+
+    if (!supabaseUrl || supabaseUrl === 'https://your-project.supabase.co') {
+      const msg = 'Supabase URL is not configured. Set NEXT_PUBLIC_SUPABASE_URL in your environment variables.'
+      console.error('[signup]', msg)
+      setError(msg)
+      return
+    }
+    if (!supabaseKey) {
+      const msg = 'Supabase anon key is not configured. Set NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment variables.'
+      console.error('[signup]', msg)
+      setError(msg)
+      return
+    }
+
     const supabase = createClient()
 
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: { full_name: data.full_name },
-      },
-    })
+    let result: Awaited<ReturnType<typeof supabase.auth.signUp>>
+    try {
+      result = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: { full_name: data.full_name },
+        },
+      })
+    } catch (networkErr) {
+      const msg = networkErr instanceof Error ? networkErr.message : String(networkErr)
+      console.error('[signup] Network/fetch error (likely CORS or unreachable Supabase URL):', msg, networkErr)
+      setError(
+        'Could not reach the authentication server. This is usually a missing environment variable or a CORS issue. Check the browser console for details.'
+      )
+      return
+    }
 
+    const { error } = result
     if (error) {
-      console.error('[signup] Supabase error:', error.status, error.message, error)
+      console.error('[signup] Supabase auth error — status:', error.status, '| message:', error.message, '| full:', error)
       setError(error.message)
     } else {
+      console.log('[signup] Success — confirmation email sent to', data.email)
       setSuccess(true)
     }
   }
