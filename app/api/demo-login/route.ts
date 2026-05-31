@@ -2,28 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const DEMO_USERS: Record<string, { id: string; email: string; password: string }> = {
-  marcus: {
-    id: '00000000-0000-0000-0000-000000000001',
-    email: 'marcus@demo.infnty.studio',
-    password: 'Demo2024!',
-  },
-  sarah: {
-    id: '00000000-0000-0000-0000-000000000002',
-    email: 'sarah@demo.infnty.studio',
-    password: 'Demo2024!',
-  },
-  daniel: {
-    id: '00000000-0000-0000-0000-000000000003',
-    email: 'daniel@demo.infnty.studio',
-    password: 'Demo2024!',
-  },
-  admin: {
-    id: '00000000-0000-0000-0000-000000000004',
-    email: 'admin@demo.infnty.studio',
-    password: 'Demo2024!',
-  },
+const DEMO_USERS: Record<string, { email: string; role: string }> = {
+  admin: { email: 'admin@infntystudio.com', role: 'admin' },
+  rehearsal: { email: 'rehearsal@infntystudio.com', role: 'customer' },
+  content: { email: 'content@infntystudio.com', role: 'customer' },
+  soundlab: { email: 'soundlab@infntystudio.com', role: 'customer' },
 }
+
+const DEMO_PASSWORD = 'Demo2024!'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -34,10 +20,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid demo user' }, { status: 400 })
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/\/$/, '')
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-  // 1. Try to create the auth user (idempotent — ignore 422)
+  // Ensure demo user exists (idempotent)
   const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
     method: 'POST',
     headers: {
@@ -46,30 +33,26 @@ export async function GET(request: NextRequest) {
       apikey: serviceRoleKey,
     },
     body: JSON.stringify({
-      id: demoUser.id,
       email: demoUser.email,
-      password: demoUser.password,
+      password: DEMO_PASSWORD,
       email_confirm: true,
     }),
   })
 
-  // 422 = user already exists, which is fine
   if (!createRes.ok && createRes.status !== 422) {
     const err = await createRes.text()
     return NextResponse.json({ error: `Failed to create user: ${err}` }, { status: 500 })
   }
 
-  // 2. Sign in with email/password to get a session
+  // Sign in to get tokens
   const tokenRes = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      apikey: anonKey,
+      Authorization: `Bearer ${anonKey}`,
     },
-    body: JSON.stringify({
-      email: demoUser.email,
-      password: demoUser.password,
-    }),
+    body: JSON.stringify({ email: demoUser.email, password: DEMO_PASSWORD }),
   })
 
   if (!tokenRes.ok) {
@@ -79,29 +62,21 @@ export async function GET(request: NextRequest) {
 
   const session = await tokenRes.json()
 
-  // 3. Set session cookies via createServerClient
+  // Write session to SSR cookies
   const cookieStore = await cookies()
-  const supabase = createServerClient(
-    supabaseUrl,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
+  const supabase = createServerClient(supabaseUrl, anonKey, {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (toSet) =>
+        toSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)),
+    },
+  })
 
   await supabase.auth.setSession({
     access_token: session.access_token,
     refresh_token: session.refresh_token,
   })
 
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  const dest = demoUser.role === 'admin' ? '/admin' : '/dashboard'
+  return NextResponse.redirect(new URL(dest, request.url))
 }
