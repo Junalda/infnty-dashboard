@@ -28,6 +28,7 @@ export function SignupForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorDetail, setErrorDetail] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormData>({
@@ -36,6 +37,7 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setError(null)
+    setErrorDetail(null)
     try {
       const result = await signUpAction({
         email: data.email,
@@ -44,13 +46,14 @@ export function SignupForm() {
       })
       if (result.error) {
         setError(result.error)
+        setErrorDetail(result.detail ?? null)
       } else {
         setSuccess(true)
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error('[signup form] Unexpected error calling server action:', msg, err)
-      setError('An unexpected error occurred. Please try again.')
+      console.error('[signup form] Server action threw:', msg, err)
+      setError(`Server action failed: ${msg}`)
     }
   }
 
@@ -130,8 +133,11 @@ export function SignupForm() {
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
-          {error}
+        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 space-y-1">
+          <p>{error}</p>
+          {errorDetail && (
+            <p className="text-xs text-red-300/70 font-mono break-all">{errorDetail}</p>
+          )}
         </div>
       )}
 
