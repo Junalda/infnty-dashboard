@@ -28,7 +28,6 @@ export function SignupForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [confirmationRequired, setConfirmationRequired] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -44,28 +43,9 @@ export function SignupForm() {
 
     if (result.error) {
       setError(result.error)
-    } else if (result.emailConfirmationRequired) {
-      setConfirmationRequired(true)
     } else {
       router.push('/dashboard')
     }
-  }
-
-  if (confirmationRequired) {
-    return (
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
-          <span className="text-3xl">✓</span>
-        </div>
-        <h3 className="text-xl font-bold text-white">Account created</h3>
-        <p className="text-zinc-400 text-sm">
-          Please check your email to confirm your account, then sign in.
-        </p>
-        <Button variant="secondary" onClick={() => router.push('/login')} className="w-full">
-          Go to Sign In
-        </Button>
-      </div>
-    )
   }
 
   return (
