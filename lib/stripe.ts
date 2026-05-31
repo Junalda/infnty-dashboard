@@ -45,6 +45,7 @@ export const PRICING_PLANS = {
         'Online booking 24/7',
         'Up to 3h rollover per month',
         'Extra hours at €35/hr',
+        'Local Storage',
       ],
     },
     {
@@ -58,6 +59,8 @@ export const PRICING_PLANS = {
         'Online booking 24/7',
         'Up to 4h rollover per month',
         'Extra hours at €35/hr',
+        'Local Storage',
+        'Priority Scheduling',
       ],
     },
   ],

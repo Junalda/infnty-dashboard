@@ -8,7 +8,7 @@ import { formatCurrency } from '@/lib/utils'
 
 export const metadata = {
   title: 'INFNTY Studio — 24/7 Creator, Music & Content Hub',
-  description: 'Amsterdam\'s premium creative hub for rehearsal, content production, and music creation.',
+  description: 'Rotterdam\'s Premier Creative Hub — Open 24/7. Rehearsal, content production, and music creation.',
 }
 
 const pillars = [
@@ -97,7 +97,7 @@ export default function LandingPage() {
 
         <div className="max-w-5xl mx-auto text-center relative">
           <Badge className="inline-flex mb-6 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold px-3 py-1.5">
-            Amsterdam&apos;s Premier Creative Hub · Open 24/7
+            Rotterdam&apos;s Premier Creative Hub — Open 24/7
           </Badge>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-6">
             Create without{' '}
