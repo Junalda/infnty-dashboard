@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signUpAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,53 +36,21 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setError(null)
-
-    // Diagnose env var availability at runtime
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    console.log('[signup] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ?? '(not set)')
-    console.log('[signup] NEXT_PUBLIC_SUPABASE_ANON_KEY present:', !!supabaseKey)
-
-    if (!supabaseUrl || supabaseUrl === 'https://your-project.supabase.co') {
-      const msg = 'Supabase URL is not configured. Set NEXT_PUBLIC_SUPABASE_URL in your environment variables.'
-      console.error('[signup]', msg)
-      setError(msg)
-      return
-    }
-    if (!supabaseKey) {
-      const msg = 'Supabase anon key is not configured. Set NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment variables.'
-      console.error('[signup]', msg)
-      setError(msg)
-      return
-    }
-
-    const supabase = createClient()
-
-    let result: Awaited<ReturnType<typeof supabase.auth.signUp>>
     try {
-      result = await supabase.auth.signUp({
+      const result = await signUpAction({
         email: data.email,
         password: data.password,
-        options: {
-          data: { full_name: data.full_name },
-        },
+        full_name: data.full_name,
       })
-    } catch (networkErr) {
-      const msg = networkErr instanceof Error ? networkErr.message : String(networkErr)
-      console.error('[signup] Network/fetch error (likely CORS or unreachable Supabase URL):', msg, networkErr)
-      setError(
-        'Could not reach the authentication server. This is usually a missing environment variable or a CORS issue. Check the browser console for details.'
-      )
-      return
-    }
-
-    const { error } = result
-    if (error) {
-      console.error('[signup] Supabase auth error — status:', error.status, '| message:', error.message, '| full:', error)
-      setError(error.message)
-    } else {
-      console.log('[signup] Success — confirmation email sent to', data.email)
-      setSuccess(true)
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[signup form] Unexpected error calling server action:', msg, err)
+      setError('An unexpected error occurred. Please try again.')
     }
   }
 
