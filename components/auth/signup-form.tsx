@@ -43,7 +43,6 @@ export function SignupForm() {
       password: data.password,
       options: {
         data: { full_name: data.full_name },
-        emailRedirectTo: `${location.origin}/auth/callback?next=/dashboard`,
       },
     })
 

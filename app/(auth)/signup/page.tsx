@@ -19,7 +19,7 @@ export default function SignupPage() {
             <span className="text-xl font-bold text-white">INFNTY Studio</span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">Create your account</h1>
-          <p className="text-zinc-400 text-sm">Join Amsterdam&apos;s premier creative hub</p>
+          <p className="text-zinc-400 text-sm">Join Rotterdam&apos;s creative hub for music, content and production.</p>
         </div>
 
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
