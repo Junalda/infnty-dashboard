@@ -28,9 +28,7 @@ export function SignupForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [errorDetail, setErrorDetail] = useState<string | null>(null)
-  const [redirectUsed, setRedirectUsed] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [confirmationRequired, setConfirmationRequired] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -38,29 +36,22 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setError(null)
-    setErrorDetail(null)
-    setRedirectUsed(null)
-    try {
-      const result = await signUpAction({
-        email: data.email,
-        password: data.password,
-        full_name: data.full_name,
-      })
-      if (result.error) {
-        setError(result.error)
-        setErrorDetail(result.detail ?? null)
-        setRedirectUsed(result.emailRedirectTo ?? null)
-      } else {
-        setSuccess(true)
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      console.error('[signup form] Server action threw:', msg, err)
-      setError(`Server action failed: ${msg}`)
+    const result = await signUpAction({
+      email: data.email,
+      password: data.password,
+      full_name: data.full_name,
+    })
+
+    if (result.error) {
+      setError(result.error)
+    } else if (result.emailConfirmationRequired) {
+      setConfirmationRequired(true)
+    } else {
+      router.push('/dashboard')
     }
   }
 
-  if (success) {
+  if (confirmationRequired) {
     return (
       <div className="text-center space-y-4">
         <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
@@ -68,10 +59,10 @@ export function SignupForm() {
         </div>
         <h3 className="text-xl font-bold text-white">Account created</h3>
         <p className="text-zinc-400 text-sm">
-          Please check your email to confirm your account.
+          Please check your email to confirm your account, then sign in.
         </p>
         <Button variant="secondary" onClick={() => router.push('/login')} className="w-full">
-          Back to Sign In
+          Go to Sign In
         </Button>
       </div>
     )
@@ -136,14 +127,8 @@ export function SignupForm() {
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 space-y-1">
-          <p>{error}</p>
-          {redirectUsed && (
-            <p className="text-xs text-zinc-400 font-mono break-all">emailRedirectTo: {redirectUsed}</p>
-          )}
-          {errorDetail && (
-            <p className="text-xs text-red-300/70 font-mono break-all">{errorDetail}</p>
-          )}
+        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+          {error}
         </div>
       )}
 
