@@ -70,7 +70,7 @@ export function BookingForm({ userId, hourBalance, onSuccess }: BookingFormProps
       setCost({
         subscriptionHours: subHours,
         extraHours,
-        extraCost: extraHours * 35,
+        extraCost: extraHours * 25,
       })
     }
   }, [watchDuration, selectedRoom, hourBalance])
@@ -230,7 +230,7 @@ export function BookingForm({ userId, hourBalance, onSuccess }: BookingFormProps
               )}
               {cost.extraHours > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-zinc-400">Extra hours (€35/hr)</span>
+                  <span className="text-zinc-400">Extra hours (€25/hr)</span>
                   <span className="text-rose-400">€{cost.extraCost}</span>
                 </div>
               )}

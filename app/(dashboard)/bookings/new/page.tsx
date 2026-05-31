@@ -37,7 +37,7 @@ export default async function NewBookingPage() {
               <ul className="space-y-1 text-xs text-zinc-500">
                 <li>• Studio open 24/7 — book any time, any day</li>
                 <li>• 15-minute buffer automatically added after each session</li>
-                <li>• Subscription hours are used first, then €35/hr for extras</li>
+                <li>• Subscription hours are used first, then €25/hr for extras</li>
                 <li>• Rollover hours are used before monthly included hours</li>
                 <li>• Loose bookings must be paid immediately</li>
               </ul>

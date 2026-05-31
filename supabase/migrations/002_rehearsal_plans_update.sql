@@ -7,7 +7,7 @@ update public.subscription_plans
 set
   name = 'Starter',
   included_hours = 8,
-  features = '["8 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 2h rollover per month","Extra hours at €35/hr"]',
+  features = '["8 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 2h rollover per month","Extra hours at €25/hr"]',
   is_active = true
 where pillar = 'rehearsal' and tier = 'starter';
 
@@ -15,7 +15,7 @@ update public.subscription_plans
 set
   name = 'Performer',
   included_hours = 12,
-  features = '["12 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 3h rollover per month","Extra hours at €35/hr"]',
+  features = '["12 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 3h rollover per month","Extra hours at €25/hr"]',
   is_active = true
 where pillar = 'rehearsal' and tier = 'performer';
 
@@ -25,7 +25,7 @@ set
   name = 'Professional',
   tier = 'professional',
   included_hours = 16,
-  features = '["16 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 4h rollover per month","Extra hours at €35/hr"]',
+  features = '["16 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 4h rollover per month","Extra hours at €25/hr"]',
   is_active = true
 where pillar = 'rehearsal' and tier = 'unlimited';
 

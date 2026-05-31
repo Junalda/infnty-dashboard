@@ -86,9 +86,9 @@ create policy "Admins can manage plans"
 
 -- Seed subscription plans
 insert into public.subscription_plans (name, pillar, tier, price_monthly, included_hours, features) values
-  ('Starter',            'rehearsal', 'starter',           200,  8,    '["8 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 2h rollover per month","Extra hours at €35/hr"]'),
-  ('Performer',          'rehearsal', 'performer',         300,  12,   '["12 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 3h rollover per month","Extra hours at €35/hr"]'),
-  ('Professional',       'rehearsal', 'professional',      400,  16,   '["16 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 4h rollover per month","Extra hours at €35/hr"]'),
+  ('Starter',            'rehearsal', 'starter',           200,  8,    '["8 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 2h rollover per month","Extra hours at €25/hr"]'),
+  ('Performer',          'rehearsal', 'performer',         300,  12,   '["12 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 3h rollover per month","Extra hours at €25/hr"]'),
+  ('Professional',       'rehearsal', 'professional',      400,  16,   '["16 hours/month rehearsal time","Access to the rehearsal room","Online booking 24/7","Up to 4h rollover per month","Extra hours at €25/hr"]'),
   ('Starter',            'content',   'starter',           750,  null, '["2 content shoots/month","Basic editing","Social media package","3 revisions per video","Content calendar"]'),
   ('Growth',             'content',   'growth',           1500,  null, '["4 content shoots/month","Advanced editing + color grade","Multi-platform optimization","Unlimited revisions","Content strategy session","Analytics report"]'),
   ('Authority',          'content',   'authority',        2700,  null, '["8 content shoots/month","Full production team","All platforms covered","Unlimited revisions","Dedicated content strategist","Monthly performance review","Priority scheduling"]'),
