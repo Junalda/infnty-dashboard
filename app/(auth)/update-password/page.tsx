@@ -4,21 +4,27 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirm_password: z.string(),
+}).refine(d => d.password === d.confirm_password, {
+  message: "Passwords don't match",
+  path: ['confirm_password'],
 })
 
 type FormData = z.infer<typeof schema>
 
-export default function ForgotPasswordPage() {
-  const [sent, setSent] = useState(false)
+export default function UpdatePasswordPage() {
+  const router = useRouter()
+  const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -28,13 +34,12 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: FormData) => {
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
-    })
+    const { error } = await supabase.auth.updateUser({ password: data.password })
     if (error) {
       setError(error.message)
     } else {
-      setSent(true)
+      setDone(true)
+      setTimeout(() => router.push('/dashboard'), 2000)
     }
   }
 
@@ -50,34 +55,43 @@ export default function ForgotPasswordPage() {
             </div>
             <span className="text-xl font-bold text-white">INFNTY Studio</span>
           </Link>
-          <h1 className="text-2xl font-bold text-white mb-2">Reset password</h1>
-          <p className="text-zinc-400 text-sm">We&apos;ll send you a reset link</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Set new password</h1>
+          <p className="text-zinc-400 text-sm">Choose a strong password for your account</p>
         </div>
 
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
-          {sent ? (
+          {done ? (
             <div className="text-center py-4">
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="h-8 w-8 text-emerald-400" />
               </div>
-              <h2 className="text-white font-bold text-lg mb-2">Check your email</h2>
-              <p className="text-zinc-400 text-sm">If an account with that email exists, we&apos;ve sent a password reset link.</p>
-              <Button variant="ghost" className="mt-6 w-full" asChild>
-                <Link href="/login"><ArrowLeft className="h-4 w-4" /> Back to sign in</Link>
-              </Button>
+              <h2 className="text-white font-bold text-lg mb-2">Password updated</h2>
+              <p className="text-zinc-400 text-sm">Redirecting you to the dashboard…</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="password">New Password</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  {...register('email')}
+                  id="password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  autoComplete="new-password"
+                  {...register('password')}
                 />
-                {errors.email && <p className="text-xs text-rose-400">{errors.email.message}</p>}
+                {errors.password && <p className="text-xs text-rose-400">{errors.password.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm_password">Confirm Password</Label>
+                <Input
+                  id="confirm_password"
+                  type="password"
+                  placeholder="Repeat your password"
+                  autoComplete="new-password"
+                  {...register('confirm_password')}
+                />
+                {errors.confirm_password && <p className="text-xs text-rose-400">{errors.confirm_password.message}</p>}
               </div>
 
               {error && (
@@ -87,11 +101,7 @@ export default function ForgotPasswordPage() {
               )}
 
               <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-              </Button>
-
-              <Button variant="ghost" className="w-full" asChild>
-                <Link href="/login"><ArrowLeft className="h-4 w-4" /> Back to sign in</Link>
+                {isSubmitting ? 'Updating…' : 'Update Password'}
               </Button>
             </form>
           )}
