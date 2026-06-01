@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -38,29 +39,22 @@ export async function signUpAction(data: {
   if (!serviceRoleKey)
     return { error: '[env] SUPABASE_SERVICE_ROLE_KEY not set in Vercel environment variables.' }
 
-  // Step 1: create + auto-confirm via admin API (bypasses all GoTrue URL validation)
-  const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
-    },
-    body: JSON.stringify({
-      email: data.email,
-      password: data.password,
-      user_metadata: { full_name: data.full_name },
-      email_confirm: true,
-    }),
+  // Step 1: create + auto-confirm via supabase-js admin API.
+  // Plain createClient (not @supabase/ssr) — no PKCE, no redirect URL validation.
+  // Only pass: email, password, email_confirm, user_metadata. Nothing else.
+  const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  if (!createRes.ok) {
-    const body = (await createRes.json().catch(() => ({}))) as {
-      msg?: string
-      message?: string
-    }
-    const msg = body.msg ?? body.message ?? `HTTP ${createRes.status}`
-    return { error: `[step1/createUser] ${msg}` }
+  const { error: createError } = await adminClient.auth.admin.createUser({
+    email: data.email,
+    password: data.password,
+    email_confirm: true,
+    user_metadata: { full_name: data.full_name },
+  })
+
+  if (createError) {
+    return { error: `[step1/createUser] ${createError.message}` }
   }
 
   // Step 2: sign in to get session tokens
