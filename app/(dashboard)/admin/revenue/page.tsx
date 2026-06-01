@@ -11,8 +11,9 @@ export default async function AdminRevenuePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('role, admin_role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
+  if (profile?.admin_role && profile.admin_role !== 'super_admin') redirect('/admin/no-access')
 
   const { data: payments } = await supabase
     .from('payments')

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Users, CalendarDays, DollarSign, AlertCircle, TrendingUp, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { formatCurrency, formatDateTime, getStatusColor } from '@/lib/utils'
+import { getAdminHome } from '@/lib/admin-permissions'
+import type { AdminRole } from '@/lib/admin-permissions'
 
 export const metadata = { title: 'Admin Overview — INFNTY Studio' }
 
@@ -14,8 +16,20 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, admin_role')
+    .eq('id', user.id)
+    .single()
+
   if (profile?.role !== 'admin') redirect('/dashboard')
+
+  const adminRole = (profile?.admin_role ?? null) as AdminRole | null
+
+  // Non-super-admins go to their designated home
+  if (adminRole !== 'super_admin' && adminRole !== null) {
+    redirect(getAdminHome(adminRole))
+  }
 
   const [
     { count: totalUsers },
@@ -23,8 +37,9 @@ export default async function AdminPage() {
     { data: recentBookings },
     { data: payments },
     { data: upcomingBookings },
+    { count: totalSubscriptions },
   ] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('role', 'admin'),
     supabase.from('bookings').select('*', { count: 'exact', head: true }),
     supabase
       .from('bookings')
@@ -39,6 +54,7 @@ export default async function AdminPage() {
       .gte('start_time', new Date().toISOString())
       .order('start_time', { ascending: true })
       .limit(5),
+    supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
   ])
 
   const totalRevenue = payments?.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0) ?? 0
@@ -49,23 +65,23 @@ export default async function AdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Admin Overview</h1>
-          <p className="text-zinc-400 mt-1">Manage all INFNTY Studio operations</p>
+          <p className="text-zinc-400 mt-1">Full platform management — Super Admin</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/admin/users">Users</Link>
+            <Link href="/admin/users">Manage Users</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/admin/bookings">All Bookings</Link>
+            <Link href="/admin/assignments">Assignments</Link>
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: 'Total Users', value: totalUsers ?? 0, icon: Users, accent: 'text-rose-400', bg: 'bg-rose-500/10' },
-          { title: 'Total Bookings', value: totalBookings ?? 0, icon: CalendarDays, accent: 'text-blue-400', bg: 'bg-blue-500/10' },
-          { title: 'Total Revenue', value: formatCurrency(totalRevenue), icon: DollarSign, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+          { title: 'Members', value: totalUsers ?? 0, icon: Users, accent: 'text-rose-400', bg: 'bg-rose-500/10' },
+          { title: 'Active Subs', value: totalSubscriptions ?? 0, icon: TrendingUp, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+          { title: 'Total Revenue', value: formatCurrency(totalRevenue), icon: DollarSign, accent: 'text-blue-400', bg: 'bg-blue-500/10' },
           { title: 'Pending Payments', value: pendingCount, icon: AlertCircle, accent: 'text-amber-400', bg: 'bg-amber-500/10' },
         ].map(s => {
           const Icon = s.icon
@@ -99,8 +115,8 @@ export default async function AdminPage() {
             ) : upcomingBookings?.map(b => (
               <div key={b.id} className="flex items-center justify-between py-2.5 border-b border-zinc-800 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-white">{b.user?.full_name ?? 'Unknown'}</p>
-                  <p className="text-xs text-zinc-500">{b.room?.name} · {formatDateTime(b.start_time)}</p>
+                  <p className="text-sm font-medium text-white">{(b.user as any)?.full_name ?? 'Unknown'}</p>
+                  <p className="text-xs text-zinc-500">{(b.room as any)?.name} · {formatDateTime(b.start_time)}</p>
                 </div>
                 <Badge className={getStatusColor(b.status)}>{b.status}</Badge>
               </div>
@@ -109,15 +125,15 @@ export default async function AdminPage() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Recent Bookings</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             {recentBookings?.map(b => (
               <div key={b.id} className="flex items-center justify-between py-2.5 border-b border-zinc-800 last:border-0">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{b.user?.full_name ?? b.user?.email ?? 'Unknown'}</p>
-                  <p className="text-xs text-zinc-500">{b.room?.name} · {b.hours_used}h · {formatCurrency(b.total_price)}</p>
+                  <p className="text-sm font-medium text-white truncate">{(b.user as any)?.full_name ?? (b.user as any)?.email ?? 'Unknown'}</p>
+                  <p className="text-xs text-zinc-500">{(b.room as any)?.name} · {b.hours_used}h · {formatCurrency(b.total_price)}</p>
                 </div>
                 <Badge className={`ml-2 shrink-0 ${getStatusColor(b.status)}`}>{b.status}</Badge>
               </div>
@@ -133,10 +149,10 @@ export default async function AdminPage() {
         <CardContent className="pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Manage Users', href: '/admin/users', icon: Users },
-              { label: 'All Bookings', href: '/admin/bookings', icon: CalendarDays },
+              { label: 'Users & Roles', href: '/admin/users', icon: Users },
+              { label: 'Assignments', href: '/admin/assignments', icon: CalendarDays },
               { label: 'Revenue Report', href: '/admin/revenue', icon: TrendingUp },
-              { label: 'Manage Rooms', href: '/admin/rooms', icon: Clock },
+              { label: 'Audit Log', href: '/admin/audit', icon: Clock },
             ].map(action => {
               const Icon = action.icon
               return (

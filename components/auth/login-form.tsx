@@ -5,18 +5,21 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { setSessionAction } from '@/app/actions/auth'
+import { getAdminHome } from '@/lib/admin-permissions'
+import type { AdminRole } from '@/lib/admin-permissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 
 const DEMO_USERS = [
-  { label: 'Admin', email: 'admin@infntystudio.com', color: 'text-rose-400' },
-  { label: 'Rehearsal', email: 'rehearsal@infntystudio.com', color: 'text-amber-400' },
-  { label: 'Content', email: 'content@infntystudio.com', color: 'text-blue-400' },
-  { label: 'Sound Lab', email: 'soundlab@infntystudio.com', color: 'text-purple-400' },
+  { label: 'Super Admin', email: 'admin@infntystudio.com', color: 'text-rose-400', password: 'Admin123!' },
+  { label: 'Producer Admin', email: 'producer@infntystudio.com', color: 'text-purple-400', password: 'Producer123!' },
+  { label: 'Content Admin', email: 'content@infntystudio.com', color: 'text-amber-400', password: 'Content123!' },
+  { label: 'Operations', email: 'operations@infntystudio.com', color: 'text-blue-400', password: 'Operations123!' },
+  { label: 'Rehearsal Member', email: 'rehearsal@infntystudio.com', color: 'text-emerald-400', password: 'Demo2024!' },
+  { label: 'Sound Lab Member', email: 'soundlab@infntystudio.com', color: 'text-cyan-400', password: 'Demo2024!' },
 ]
-const DEMO_PASSWORD = 'Demo2024!'
 
 export function LoginForm() {
   const router = useRouter()
@@ -54,12 +57,17 @@ export function LoginForm() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, admin_role')
       .eq('id', data.session.user.id)
       .single()
 
     const role = profile?.role ?? 'customer'
-    router.push(role === 'admin' ? '/admin' : '/dashboard')
+    if (role === 'admin') {
+      const adminRole = (profile?.admin_role ?? null) as AdminRole | null
+      router.push(getAdminHome(adminRole))
+    } else {
+      router.push('/dashboard')
+    }
     router.refresh()
   }
 
@@ -73,13 +81,13 @@ export function LoginForm() {
       {/* Demo login buttons */}
       <div>
         <p className="text-xs text-zinc-500 mb-2 font-medium uppercase tracking-wide">Demo accounts</p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {DEMO_USERS.map((u) => (
             <button
               key={u.email}
               type="button"
               disabled={loading}
-              onClick={() => doLogin(u.email, DEMO_PASSWORD)}
+              onClick={() => doLogin(u.email, u.password)}
               className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
             >
               <span className={u.color}>{u.label}</span>

@@ -1,4 +1,5 @@
 export type UserRole = 'customer' | 'partner' | 'admin'
+export type AdminRole = 'super_admin' | 'producer_admin' | 'content_admin' | 'operations_admin'
 export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trialing'
 export type Pillar = 'rehearsal' | 'content' | 'soundlab'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed'
@@ -10,6 +11,7 @@ export type SoundLabProjectStatus = 'idea' | 'writing' | 'ai_production' | 'reco
 export interface Profile {
   id: string
   role: UserRole
+  admin_role?: AdminRole | null
   full_name: string | null
   email: string
   phone: string | null

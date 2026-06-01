@@ -2,14 +2,56 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const DEMO_USERS: Record<string, { email: string; role: string }> = {
-  admin: { email: 'admin@infntystudio.com', role: 'admin' },
-  rehearsal: { email: 'rehearsal@infntystudio.com', role: 'customer' },
-  content: { email: 'content@infntystudio.com', role: 'customer' },
-  soundlab: { email: 'soundlab@infntystudio.com', role: 'customer' },
+interface DemoUser {
+  email: string
+  password: string
+  role: string
+  admin_role?: string
+  redirect: string
 }
 
-const DEMO_PASSWORD = 'Demo2024!'
+const DEMO_USERS: Record<string, DemoUser> = {
+  admin: {
+    email: 'admin@infntystudio.com',
+    password: 'Admin123!',
+    role: 'admin',
+    admin_role: 'super_admin',
+    redirect: '/admin',
+  },
+  producer: {
+    email: 'producer@infntystudio.com',
+    password: 'Producer123!',
+    role: 'admin',
+    admin_role: 'producer_admin',
+    redirect: '/admin/soundlab',
+  },
+  content: {
+    email: 'content@infntystudio.com',
+    password: 'Content123!',
+    role: 'admin',
+    admin_role: 'content_admin',
+    redirect: '/admin/content',
+  },
+  operations: {
+    email: 'operations@infntystudio.com',
+    password: 'Operations123!',
+    role: 'admin',
+    admin_role: 'operations_admin',
+    redirect: '/admin/operations',
+  },
+  rehearsal: {
+    email: 'rehearsal@infntystudio.com',
+    password: 'Demo2024!',
+    role: 'customer',
+    redirect: '/dashboard',
+  },
+  soundlab: {
+    email: 'soundlab@infntystudio.com',
+    password: 'Demo2024!',
+    role: 'customer',
+    redirect: '/dashboard',
+  },
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -34,7 +76,7 @@ export async function GET(request: NextRequest) {
     },
     body: JSON.stringify({
       email: demoUser.email,
-      password: DEMO_PASSWORD,
+      password: demoUser.password,
       email_confirm: true,
     }),
   })
@@ -52,7 +94,7 @@ export async function GET(request: NextRequest) {
       apikey: anonKey,
       Authorization: `Bearer ${anonKey}`,
     },
-    body: JSON.stringify({ email: demoUser.email, password: DEMO_PASSWORD }),
+    body: JSON.stringify({ email: demoUser.email, password: demoUser.password }),
   })
 
   if (!tokenRes.ok) {
@@ -77,6 +119,5 @@ export async function GET(request: NextRequest) {
     refresh_token: session.refresh_token,
   })
 
-  const dest = demoUser.role === 'admin' ? '/admin' : '/dashboard'
-  return NextResponse.redirect(new URL(dest, request.url))
+  return NextResponse.redirect(new URL(demoUser.redirect, request.url))
 }

@@ -11,8 +11,12 @@ export default async function AdminBookingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('role, admin_role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
+  const adminRole = profile?.admin_role as string | null
+  if (adminRole && !['super_admin', 'operations_admin'].includes(adminRole)) {
+    redirect('/admin/no-access')
+  }
 
   const { data: bookings } = await supabase
     .from('bookings')

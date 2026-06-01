@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import type { UserRole } from '@/types'
+import type { AdminRole } from '@/lib/admin-permissions'
+import { getAdminRoleLabel } from '@/lib/admin-permissions'
 import {
   LayoutDashboard,
   CalendarDays,
@@ -23,6 +25,9 @@ import {
   Download,
   Disc,
   ListMusic,
+  ClipboardList,
+  Link2,
+  ScrollText,
 } from 'lucide-react'
 
 interface NavItem {
@@ -75,14 +80,36 @@ const partnerNav: NavItem[] = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
-const adminNav: NavItem[] = [
-  { label: 'Admin Overview', href: '/admin', icon: Shield },
+const superAdminNav: NavItem[] = [
+  { label: 'Overview', href: '/admin', icon: Shield },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Assignments', href: '/admin/assignments', icon: Link2 },
   { label: 'Bookings', href: '/admin/bookings', icon: CalendarDays },
   { label: 'Revenue', href: '/admin/revenue', icon: BarChart3 },
   { label: 'Rooms', href: '/admin/rooms', icon: DoorOpen },
   { label: 'Content Mgmt', href: '/admin/content', icon: Video },
   { label: 'Songs', href: '/admin/songs', icon: Music2 },
+  { label: 'Audit Log', href: '/admin/audit', icon: ScrollText },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
+const producerAdminNav: NavItem[] = [
+  { label: 'Sound Lab', href: '/admin/soundlab', icon: Music2 },
+  { label: 'My Clients', href: '/admin/assignments', icon: UserCheck },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
+const contentAdminNav: NavItem[] = [
+  { label: 'Content Hub', href: '/admin/content', icon: Video },
+  { label: 'My Clients', href: '/admin/assignments', icon: UserCheck },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
+const operationsAdminNav: NavItem[] = [
+  { label: 'Operations', href: '/admin/operations', icon: ClipboardList },
+  { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Bookings', href: '/admin/bookings', icon: CalendarDays },
+  { label: 'Audit Log', href: '/admin/audit', icon: ScrollText },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
@@ -94,15 +121,26 @@ const pillarMeta: Record<string, { label: string; color: string; dot: string }> 
 
 interface SidebarProps {
   role?: UserRole
+  adminRole?: AdminRole | null
   pillars?: string[]
 }
 
-export function Sidebar({ role = 'customer', pillars = [] }: SidebarProps) {
+function getAdminNav(adminRole: AdminRole | null | undefined): NavItem[] {
+  switch (adminRole) {
+    case 'super_admin':      return superAdminNav
+    case 'producer_admin':   return producerAdminNav
+    case 'content_admin':    return contentAdminNav
+    case 'operations_admin': return operationsAdminNav
+    default:                 return superAdminNav
+  }
+}
+
+export function Sidebar({ role = 'customer', adminRole, pillars = [] }: SidebarProps) {
   const pathname = usePathname()
 
   let navItems: NavItem[]
   if (role === 'admin') {
-    navItems = adminNav
+    navItems = getAdminNav(adminRole)
   } else if (role === 'partner') {
     navItems = partnerNav
   } else if (pillars.length === 0) {
@@ -112,7 +150,6 @@ export function Sidebar({ role = 'customer', pillars = [] }: SidebarProps) {
     if (pillars.includes('rehearsal')) navItems.push(...rehearsalNav)
     if (pillars.includes('content')) navItems.push(...contentNav)
     if (pillars.includes('soundlab')) navItems.push(...soundlabNav)
-    // Deduplicate (e.g. Downloads appears in both content and soundlab)
     navItems = navItems.filter((item, idx, arr) => arr.findIndex(i => i.href === item.href) === idx)
     navItems.push(...settingsNav)
   }
@@ -120,6 +157,10 @@ export function Sidebar({ role = 'customer', pillars = [] }: SidebarProps) {
   const activePillars = role === 'admin'
     ? ['rehearsal', 'content', 'soundlab']
     : pillars.length > 0 ? pillars : []
+
+  const roleLabel = role === 'admin'
+    ? getAdminRoleLabel(adminRole)
+    : role
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-zinc-800 bg-black/50 backdrop-blur-xl h-screen sticky top-0">
@@ -130,7 +171,7 @@ export function Sidebar({ role = 'customer', pillars = [] }: SidebarProps) {
         </div>
         <div>
           <p className="font-bold text-white text-sm">INFNTY Studio</p>
-          <p className="text-xs text-zinc-500 capitalize">{role}</p>
+          <p className="text-xs text-zinc-500 capitalize">{roleLabel}</p>
         </div>
       </div>
 
@@ -138,7 +179,10 @@ export function Sidebar({ role = 'customer', pillars = [] }: SidebarProps) {
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'))
+          const isExact = item.href === '/admin' || item.href === '/dashboard'
+          const isActive = isExact
+            ? pathname === item.href
+            : pathname === item.href || pathname.startsWith(item.href + '/')
           return (
             <Link
               key={item.href + item.label}

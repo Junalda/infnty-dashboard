@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import type { UserRole } from '@/types'
+import type { AdminRole } from '@/lib/admin-permissions'
 
 export default async function DashboardLayout({
   children,
@@ -18,11 +19,12 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, admin_role')
     .eq('id', user.id)
     .single()
 
   const role = (profile?.role ?? 'customer') as UserRole
+  const adminRole = (profile?.admin_role ?? null) as AdminRole | null
 
   const { data: subs } = await supabase
     .from('subscriptions')
@@ -34,7 +36,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-black">
-      <Sidebar role={role} pillars={pillars} />
+      <Sidebar role={role} adminRole={adminRole} pillars={pillars} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header role={role} />
         <main className="flex-1 p-6 overflow-auto">
