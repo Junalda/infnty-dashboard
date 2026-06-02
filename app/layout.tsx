@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'INFNTY Studio — 24/7 Creator, Music & Content Hub',
-  description: 'Rotterdam\'s Premier Creative Hub — Open 24/7. Book rehearsal space, grow your content, and produce your music with INFNTY Studio.',
+  title: 'INFNTY Studio — 24/7 Rehearsal Studio Rotterdam',
+  description: 'Rotterdam\'s premier rehearsal studio. Open 24/7. Membership-based access with professional acoustics, backline, and a music community.',
   openGraph: {
-    title: 'INFNTY Studio',
-    description: 'Rehearsal · Content Engine · Sound Lab',
+    title: 'INFNTY Studio Rotterdam',
+    description: '24/7 Rehearsal Memberships · Professional Studio · Rotterdam',
     type: 'website',
   },
 }
